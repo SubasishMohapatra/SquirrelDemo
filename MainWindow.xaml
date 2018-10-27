@@ -5,8 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SquirrelDemo"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="222.313" Width="625" DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}" FontSize="14" FontWeight="Normal">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.ColumnSpan="2" Content="Welcome to SquirrelDemo" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0" Height="30" Width="Auto"/>
+        <Label Grid.Row="1" Grid.Column="0" Content="App Location: " />
+        <Label Grid.Row="1" Grid.Column="1" Content="{Binding AppLocation}" HorizontalAlignment="Left"  VerticalAlignment="Top" Margin="0,0,0,0" Height="30" Width="Auto"/>
+        <Label Grid.Row="2" Grid.Column="0" Content="AppVersionInfo: " />
+        <Label Grid.Row="2" Grid.Column="1" Content="{Binding AppVersionInfo}" HorizontalAlignment="Left"  VerticalAlignment="Top" Margin="0,0,0,0" Height="30" Width="Auto"/>
     </Grid>
 </Window>
+
+        
+    
