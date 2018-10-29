@@ -37,21 +37,25 @@ namespace SquirrelDemo
 
             using (var updateManager = new UpdateManager(Constants.PackagePath))
             {
-                var appUpdateInfo = await updateManager.CheckForUpdate();
-                if (appUpdateInfo != null && appUpdateInfo.ReleasesToApply.Any())
+                if (updateManager.IsInstalledApp)
                 {
-                    var newVersion = appUpdateInfo.ReleasesToApply.OrderBy(x => x.Version).Last();
-                    string msg = $"New version available!" +
-                                 $"\n\nCurrent version: {appUpdateInfo.CurrentlyInstalledVersion.Version}" +
-                                 $"\nNew version: {appUpdateInfo.FutureReleaseEntry.Version}" +
-                                 $"\n\nUpdate application now?";
-                    var msgBoxresult = MessageBox.Show(msg, "New version detected", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (msgBoxresult == MessageBoxResult.Yes)
+                    var appUpdateInfo = await updateManager.CheckForUpdate();
+                    if (appUpdateInfo != null && appUpdateInfo.ReleasesToApply.Any())
                     {
-                        releaseEntry = await updateManager.UpdateApp();
-                        MessageBox.Show($"App upgraded to: {releaseEntry?.Version.ToString() ?? "No update"}" +
-                                        $"{Environment.NewLine}" +
-                                        $"Path={appPath}", "New app info");
+                        var newVersion = appUpdateInfo.ReleasesToApply.OrderBy(x => x.Version).Last();
+                        string msg = $"New version available!" +
+                                     $"\n\nCurrent version: {appUpdateInfo.CurrentlyInstalledVersion.Version}" +
+                                     $"\nNew version: {appUpdateInfo.FutureReleaseEntry.Version}" +
+                                     $"\n\nUpdate application now?";
+                        var msgBoxresult = MessageBox.Show(msg, "New version detected", MessageBoxButton.YesNo,
+                            MessageBoxImage.Question);
+                        if (msgBoxresult == MessageBoxResult.Yes)
+                        {
+                            releaseEntry = await updateManager.UpdateApp();
+                            MessageBox.Show($"App upgraded to: {releaseEntry?.Version.ToString() ?? "No update"}" +
+                                            $"{Environment.NewLine}" +
+                                            $"Path={appPath}", "New app info");
+                        }
                     }
                 }
             }
