@@ -16,7 +16,7 @@ namespace SquirrelDemo
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            var updateManager = new UpdateManager(@"C:\Users\SUMOHAP\SquirrelDemo");
+            var updateManager = new UpdateManager(Constants.PackagePath);
             SquirrelAwareApp.HandleEvents(
                 onInitialInstall: v =>
                 {
