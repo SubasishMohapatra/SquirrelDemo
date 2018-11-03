@@ -151,5 +151,10 @@
       <Name>Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\icons8-squirrel-filled-50.png" />
+    <Resource Include="Images\icons8_squirrel_filled_50_iTq_icon.ico" />
+    <Resource Include="Images\icons8_squirrel_filled_50_qMX_icon.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
