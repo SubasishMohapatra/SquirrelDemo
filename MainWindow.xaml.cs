@@ -1,20 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
+﻿using Splat;
 using Squirrel;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Windows;
 
 namespace SquirrelDemo
 {
@@ -31,38 +20,74 @@ namespace SquirrelDemo
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            //MessageBox.Show("Hello");
-            ReleaseEntry releaseEntry = null;
-            var appPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\SquirrelDemo\\SquirrelDemo.exe";
-
-            using (var updateManager = new UpdateManager(Constants.PackagePath))
+            MessageBox.Show("Hello");
+            using (var logger = new SetupLogLogger(false) {Level = LogLevel.Info})
             {
-                if (updateManager.IsInstalledApp)
+                try
                 {
-                    var appUpdateInfo = await updateManager.CheckForUpdate();
-                    if (appUpdateInfo != null && appUpdateInfo.ReleasesToApply.Any())
+                    ReleaseEntry releaseEntry = null;
+                    //var appPath =
+                    //    $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\SquirrelDemo\\SquirrelDemo.exe";
+                    var rootDirectory =
+                        $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\";
+                    var newVersion = default(string);
+                    using (var updateManager = new UpdateManager(Constants.PackagePath,"SquirrelDemo",rootDirectory))
                     {
-                        var newVersion = appUpdateInfo.ReleasesToApply.OrderBy(x => x.Version).Last();
-                        string msg = $"New version available!" +
-                                     $"\n\nCurrent version: {appUpdateInfo.CurrentlyInstalledVersion.Version}" +
-                                     $"\nNew version: {appUpdateInfo.FutureReleaseEntry.Version}" +
-                                     $"\n\nUpdate application now?";
-                        var msgBoxresult = MessageBox.Show(msg, "New version detected", MessageBoxButton.YesNo,
-                            MessageBoxImage.Question);
-                        if (msgBoxresult == MessageBoxResult.Yes)
+                        logger.Write($"Get package from url details", LogLevel.Info);
+                        if (updateManager.IsInstalledApp)
                         {
-                            releaseEntry = await updateManager.UpdateApp();
-                            MessageBox.Show($"App upgraded to: {releaseEntry?.Version.ToString() ?? "No update"}" +
-                                            $"{Environment.NewLine}" +
-                                            $"Path={appPath}", "New app info");
+                            logger.Write($"App is installed", LogLevel.Info);
+                            var appUpdateInfo = await updateManager.CheckForUpdate();
+                            newVersion = appUpdateInfo.FutureReleaseEntry.Version.ToString();
+                            logger.Write($"Check for update done", LogLevel.Info);
+                            if (appUpdateInfo != null && appUpdateInfo.ReleasesToApply.Any())
+                            {
+                                logger.Write($"Release version to apply: {newVersion}", LogLevel.Info);
+                                string msg = $"New version available!" +
+                                             $"\n\nCurrent version: {appUpdateInfo.CurrentlyInstalledVersion.Version}" +
+                                             $"\nNew version: {newVersion}" +
+                                             $"\n\nUpdate application now?";
+                                var msgBoxresult = MessageBox.Show(msg, "New version detected", MessageBoxButton.YesNo,
+                                    MessageBoxImage.Question);
+                                if (msgBoxresult == MessageBoxResult.Yes)
+                                {
+                                    this.Visibility = Visibility.Hidden;
+                                    releaseEntry = await updateManager.UpdateApp();
+                                    //Environment.Exit(0);
+                                    //logger.Write($"App upgraded to version: {appUpdateInfo.FutureReleaseEntry.Version}", LogLevel.Info);
+                                    //MessageBox.Show(
+                                    //    $"App upgraded to version: {appUpdateInfo.FutureReleaseEntry.Version}.\nPress OK to launch new version." +
+                                    //    $"{Environment.NewLine}", "New app info");
+                                }
+                            }
                         }
                     }
+
+                    if (releaseEntry != null)
+                    {
+                        //this.Visibility = Visibility.Hidden;
+                        logger.Write($"Restart app", LogLevel.Info);
+                        var exeToStart =
+                            $"{rootDirectory}SquirrelDemo\\app-{newVersion}\\SquirrelDemo.exe";
+                        System.Diagnostics.Process.Start(exeToStart);
+                        Thread.Sleep(1000);
+                        Application.Current.Shutdown(0);
+
+                        //UpdateManager.RestartApp(exeToStart);
+                        //await UpdateManager.RestartAppWhenExited(exeToStart).ContinueWith(t =>
+                        //{
+                        //    if (t.IsCompleted)
+                        //    {
+                        //        Environment.Exit(0);
+                        //    }
+                        //});
+                    }
                 }
-            }
-            if (releaseEntry!=null)
-            {
-                this.Visibility = Visibility.Hidden;
-                UpdateManager.RestartApp();
+                catch (Exception ex)
+                {
+                    logger.Write($"Exception message: {ex?.Message}" +
+                                 $"\nInner Exception message:{ex.InnerException?.Message}  ", LogLevel.Error);
+                }
             }
         }
 
